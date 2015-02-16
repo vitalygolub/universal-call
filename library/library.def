@@ -1,0 +1,6 @@
+LIBRARY   library
+EXPORTS
+   NVF_Cashier		@1
+   NVF_AddPayment	@2
+   GetFMBParams		@3
+   SetDebug			@4

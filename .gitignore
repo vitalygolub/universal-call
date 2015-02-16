@@ -1,0 +1,8 @@
+**/[Dd]ebug
+**/[Rr]elease
+**/*.suo
+**/*.user
+**/*.ncb
+**/*.vcxproj.filters
+**/*.sdf
+**/*.opensdf
