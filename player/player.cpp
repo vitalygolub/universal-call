@@ -8,7 +8,7 @@
 
 void parse_and_call(char *);
 
-class stackframe	//stack frame for universal calls, just syntax constraction to push to stack 
+struct stackframe	//stack frame for universal calls, just syntax constraction to push to stack 
 {
 public: 
 	int b[20]; 
