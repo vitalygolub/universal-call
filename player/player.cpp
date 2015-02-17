@@ -5,89 +5,43 @@
 #include <windows.h>
 
 #include "argument.h"
+#include "function.h"
 
-void parse_and_call(char *);
+
+FARPROC get_func_pointer(const char * funcname)
+{
+	static HMODULE module = NULL;
+	if (module == NULL)
+		module = LoadLibraryA("library.dll");
+
+	return GetProcAddress(module, funcname);
+}
 
 template<int N> struct stackframe	//stack frame for universal calls, just syntax constraction to push to stack 
 {
 public: 
 	int b[N]; 
-	typedef int(*functype)(stackframe<N>);	
-		//type of universal function  for current stack
-	//stackframe(){ memset(b, 0, sizeof(stackframe)); }
+	typedef int(__stdcall *functype_stdcall)(stackframe<N>);
+	typedef int(__cdecl *functype_cdecl)(stackframe<N>);
 
-	// type 
-	FARPROC get_func_pointer(const char * funcname)
+	void call(const char *func_name, void * stackdata, int stacklen, const std::string conventions)
 	{
-		static HMODULE module = NULL;
-		if (module == NULL)
-			module = LoadLibraryA("library.dll");
 
-		return GetProcAddress(module, funcname);
-	}
-
-	void parse_and_call(char * line)
-	{
-		std::stringstream ss(line);
-		std::string buf;
-		std::string fnname;
-		std::string type_name;
-
-		stackframe<N>::functype fn;
-		if (ss >> fnname)		//token 0 is function name
-			fn = (functype)this->get_func_pointer(fnname.c_str());
-		else
-			return;
-
-		if (fn == NULL)
+		auto fn = get_func_pointer(func_name);
+		if (fn != NULL)
 		{
-			std::cout << "Function " << fnname << " not found" << std::endl;
-			exit(1);
+			memcpy(&this->b[0], stackdata, stacklen);
+			
+			if (conventions == "__stdcall")
+			{
+				std::cout << "Function returned " << ((functype_stdcall)fn)(*this) << std::endl;
+			}
+			if (conventions == "__cdecl")
+			{
+				std::cout << "Function returned " << ((functype_cdecl)fn)(*this) << std::endl;
+			}
+
 		}
-
-		std::vector<argument> arguments;
-		bool byref = false;
-		int len = 0;
-
-		while (ss >> type_name) //type name is useless, but will preserve
-		{
-			byref = false; len = 0;
-
-			ss >> buf;	//* after type name or data
-			if (buf == "*")
-			{
-				byref = true;
-				ss >> buf;
-				len = std::stoi(buf);
-				ss >> buf;
-			}
-			else
-			{
-				len = buf.length() >> 1;	//TODO: will be better to comparewith typename, but next time
-				byref = false;
-			}
-			arguments.insert(arguments.end(), argument(type_name, byref, len, buf.c_str()));
-		}
-
-		std::cout << "Function " << fnname << " has " << arguments.size() << " arguments" << std::endl;
-
-		int *stack_ptr = this->b;
-
-		for (int i = 0; i < arguments.size(); i++)
-		{
-			if (arguments[i].byref)
-			{
-				*stack_ptr = (int)(&(arguments[i].data[0]));	//copy pointer
-				stack_ptr++;
-			}
-			else
-			{
-				//copy data to stack frame
-				memcpy(stack_ptr, &(arguments[i].data[0]), arguments[i].len);
-				stack_ptr += arguments[i].len >> 2;
-			}
-		}
-		std::cout << "Function returned " << fn(*this) << std::endl;
 	}
 
 
@@ -102,9 +56,68 @@ int main(int argc, char* argv[])
 	logfile.open("log.txt", std::ofstream::in);
 	while (!logfile.eof())
 	{
-		logfile.getline(sline, 256);
-		stackframe<20> sf;
-		sf.parse_and_call(sline);
+		std::istream *my = &logfile;
+
+		stackframe<20> sf ;
+
+		stackframe<9> *psf09 = (stackframe<9> *) &sf;
+		stackframe<8> *psf08 = (stackframe<8> *) &sf;
+		stackframe<7> *psf07 = (stackframe<7> *) &sf;
+		stackframe<6> *psf06 = (stackframe<6> *) &sf;
+		stackframe<5> *psf05 = (stackframe<5> *) &sf;
+		stackframe<4> *psf04 = (stackframe<4> *) &sf;
+		stackframe<3> *psf03 = (stackframe<3> *) &sf;
+		stackframe<2> *psf02 = (stackframe<2> *) &sf;
+		stackframe<1> *psf01 = (stackframe<1> *) &sf;
+		stackframe<0> *psf00 = (stackframe<0> *) &sf;
+	
+
+		function *f;
+		while (!my->eof())
+		{
+			f = new function(*my);
+			if (f->parsed)
+			{
+				switch (f -> get_datalength() / sizeof(int))
+				{
+				case 0:
+					psf00->call(f->get_name(), NULL, 0, f->get_conventions());
+					break;
+				case 1:
+					psf01->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 2:
+					psf02->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 3:
+					psf03->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 4:
+					psf04->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 5:
+					psf05->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 6:
+					psf06->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 7:
+					psf07->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 8:
+					psf08->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				case 9:
+					psf09->call(f->get_name(), f->get_data(), f->get_datalength(), f->get_conventions());
+					break;
+				}
+			}
+			delete(f);
+		}
+
+
+		
+		
 		
 	}
 	return 0;

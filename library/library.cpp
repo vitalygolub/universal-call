@@ -7,8 +7,8 @@
 
 std::string to_binary(void * data, int len);
 
-#define BYREF(len,value)	" " << ( typeid(value).name() ) << " " << (len) << " " <<  to_binary( (void *)(value), (len * sizeof(*value)) ) 
-#define BYVAL(value)		" " << ( typeid(value).name() ) << " " <<  to_binary ( (void *)(&value) , sizeof(value) )
+#define BYREF(len,value)	 to_binary( (void *)(value), (len * sizeof(*value)) ) 
+#define BYVAL(value)		 to_binary ( (void *)(&value) , sizeof(value) )
 #include <windows.h>
 bool debug = 0;
 
@@ -34,20 +34,21 @@ extern int SetDebug(void)
 	return 0;
 }
 
-extern int GetFMBParams(char *aComPort, long *aBaudRate, int *aFMB_Disable, int *aAuto_Open, int *aFMB_Debug)
+extern int __cdecl GetFMBParams(char *aComPort, long *aBaudRate, int *aFMB_Disable, int *aAuto_Open, int *aFMB_Debug)
 {
 	if (debug)
 	{
 		std::ofstream logfile;
 		logfile.open("log.txt", std::ofstream::out | std::ofstream::app);
 		logfile
-			<< __FUNCTION__		// will be better ordinal
-			<< BYREF(strlen(aComPort) + 1, aComPort)
-			<< BYREF(1, aBaudRate)
-			<< BYREF(1, aFMB_Disable)
-			<< BYREF(1, aAuto_Open)
-			<< BYREF(1, aFMB_Debug)
+			<< __FUNCSIG__ << "{"
+			<< BYREF(strlen(aComPort) + 1, aComPort) << ","
+			<< BYREF(1, aBaudRate) << ","
+			<< BYREF(1, aFMB_Disable) << ","
+			<< BYREF(1, aAuto_Open) << ","
+			<< BYREF(1, aFMB_Debug) << "}"
 			<< std::endl;
+			
 		logfile.close();
 	}
 	std::cout << __FUNCTION__
@@ -58,18 +59,18 @@ extern int GetFMBParams(char *aComPort, long *aBaudRate, int *aFMB_Disable, int 
 
 }
 
-extern int NVF_AddPayment(long *aStatus, int tender_number, double amount, char* acomments)
+extern  int __stdcall  NVF_AddPayment(long *aStatus, int tender_number, double amount, char* acomments)
 {
 	if (debug)
 	{
 		std::ofstream logfile;
 		logfile.open("log.txt", std::ofstream::out | std::ofstream::app);
 		logfile
-			<< __FUNCTION__
-			<< BYREF(1, aStatus)
-			<< BYVAL(tender_number)
-			<< BYVAL(amount)
-			<< BYREF(strlen(acomments) + 1, acomments)
+			<< __FUNCSIG__ << "{"
+			<< BYREF(1, aStatus) << ","
+			<< BYVAL(tender_number) << ","
+			<< BYVAL(amount) << ","
+			<< BYREF(strlen(acomments) + 1, acomments) << "}"
 			<< std::endl;
 		logfile.close();
 	}
@@ -81,17 +82,19 @@ extern int NVF_AddPayment(long *aStatus, int tender_number, double amount, char*
 	return 25;
 }
 
-extern int NVF_Cashier(long *aStatus, char *cashier_name)
+extern  int __stdcall NVF_Cashier(long *aStatus, char *cashier_name)
 {
 	if (debug)
 	{
 		std::ofstream logfile;
 		logfile.open("log.txt", std::ofstream::out | std::ofstream::app);
 		logfile
-			<< __FUNCTION__
-			<< BYREF(1, aStatus)
-			<< BYREF(strlen(cashier_name) + 1, cashier_name)
+			<< __FUNCSIG__ << "{"
+			<< BYREF(1, aStatus) << ","
+			<< BYREF(strlen(cashier_name) + 1, cashier_name) << "}"
 			<< std::endl;
+			
+
 		logfile.close();
 	}
 	std::cout << __FUNCTION__ << "  " << " cahier_name = \"" << cashier_name << "\"" << std::endl;
@@ -116,4 +119,21 @@ std::string  to_binary(void * data, int len)
 	}
 
 	return tmp;
+}
+
+
+int iamvoid(void)
+{
+	std::cout << "I Am Weasel^w void" << std::endl;
+	if (debug)
+	{
+		std::ofstream logfile;
+		logfile.open("log.txt", std::ofstream::out | std::ofstream::app);
+		logfile
+			<< __FUNCSIG__ << "{}"
+			<< std::endl;
+
+		logfile.close();
+	}
+	return 0;
 }

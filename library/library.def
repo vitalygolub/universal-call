@@ -4,3 +4,4 @@ EXPORTS
    NVF_AddPayment	@2
    GetFMBParams		@3
    SetDebug			@4
+   iamvoid			@5

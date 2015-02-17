@@ -1,3 +1,7 @@
+2015-02-17
+* stdcall and cdecl both are ready, determined from log
+
+2015-02 initial release
 Just illustrates, how to make universal function call, using information, preserved in log file.
 Is not checked with other compilers, but definitely is possible to get ride on 32 bit.
 
